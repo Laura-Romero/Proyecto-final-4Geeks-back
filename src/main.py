@@ -33,11 +33,16 @@ def sitemap():
 @app.route('/user', methods=['GET'])
 def handle_hello():
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+    print("You just got every single user")
 
-    return jsonify(response_body), 200
+    return jsonify(User.getUsers()), 200
+
+@app.route('/user/<int:id>', methods=['GET'])
+def handle_user_by_id(id):
+    
+    print(f"You just got the user by id = {id}")
+
+    return jsonify(User.get_user_by_id(id)), 200
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
