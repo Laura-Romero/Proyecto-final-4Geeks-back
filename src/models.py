@@ -59,6 +59,15 @@ class User(db.Model):
         user = user.serialize()
         return user
 
+    def modify_user(user_id, new_value):
+        user = User.query.get(user_id)
+        keys = new_value.keys()
+        user[keys] = 2
+        db.session.commit()
+        # user = User.query.get(2)
+        # user.username = "MARICO EL QUE LO LEA"
+        # db.session.commit()
+
     
 
 
