@@ -50,7 +50,10 @@ def create_user():
     User.add_user(user_data)
     return "New user created"
 
-
+@app.route('/user/<int:id>', methods=['DELETE'])
+def delete_user_by_id(id):
+    User.delete_user(id)
+    return "user delete"
 
     
 # this only runs if `$ python src/main.py` is executed
