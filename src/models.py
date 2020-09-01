@@ -13,6 +13,7 @@ class User(db.Model):
     country = db.Column(db.String(50), unique=False, nullable=False)
     city = db.Column(db.String(50), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
+    # CHILDREN
     twitter = db.relationship('Twitter', lazy=True)
     task = db.relationship('Task', lazy=True)
     weather = db.relationship('Weather', lazy=True) 
@@ -35,6 +36,19 @@ class User(db.Model):
             "city": self.city
         }
     
+    def add_user(user_data):
+        new_user = User()
+        new_user.username = user_data['username']
+        new_user.password = user_data['password']
+        new_user.fullname = user_data['fullname']
+        new_user.email = user_data['email']
+        new_user.country = user_data['country']
+        new_user.city = user_data['city']
+        new_user.is_active = user_data['is_active']
+
+        db.session.add(new_user)
+        db.session.commit()
+    
     def getUsers():
         all_users = User.query.all()
         all_users = list(map(lambda x: x.serialize(), all_users))
@@ -44,6 +58,9 @@ class User(db.Model):
         user = User.query.get(user_id)
         user = user.serialize()
         return user
+
+    
+
 
 class Twitter(db.Model):
     id = db.Column(db.Integer, primary_key=True)

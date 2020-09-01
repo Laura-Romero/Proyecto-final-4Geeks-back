@@ -31,7 +31,7 @@ def sitemap():
     return generate_sitemap(app)
 
 @app.route('/user', methods=['GET'])
-def handle_hello():
+def handle_user():
 
     print("You just got every single user")
 
@@ -44,6 +44,15 @@ def handle_user_by_id(id):
 
     return jsonify(User.get_user_by_id(id)), 200
 
+@app.route('/user', methods=['POST'])
+def create_user():
+    user_data = request.get_json()
+    User.add_user(user_data)
+    return "New user created"
+
+
+
+    
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
