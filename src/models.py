@@ -70,6 +70,7 @@ class User(db.Model):
         user = user.serialize()
         return user
 
+
 class Widget(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     widget_type = db.Column(db.Enum('Twitter', 'Gmail', 'Tasks', 'Weather', 'Clock', 'Compliments'), unique=True, nullable=False)
