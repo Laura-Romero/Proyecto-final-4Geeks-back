@@ -50,13 +50,12 @@ def create_user():
     User.add_user(user_data)
     return "New user created"
 
-@app.route('/user/<int:id>', methods=['PATCH'])
-def modify_user_by_id(id):
-
+@app.route('/user/<int:id>', methods=['PUT', 'PATCH'])
+def modify_user_info(id):
     data_to_modify = request.get_json()
-    User.modify_user(id, data_to_modify)
+    User.update_user_info(id, data_to_modify)
 
-    return f"the user number {id} has been modified"
+    return f"the user number {id} has been modified", 201
 
 
 

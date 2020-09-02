@@ -59,16 +59,15 @@ class User(db.Model):
         user = user.serialize()
         return user
 
-    def modify_user(user_id, new_value):
+    def update_user_info(user_id, new_value):
         user = User.query.get(user_id)
-        keys = new_value.keys()
-        user[keys] = 2
+        for key, value in new_value.items():
+            if key != 'id':
+                setattr(user, key, value)
         db.session.commit()
-        # user = User.query.get(2)
-        # user.username = "MARICO EL QUE LO LEA"
-        # db.session.commit()
-
+        return (user), 201
     
+        
 
 
 class Twitter(db.Model):
