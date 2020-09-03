@@ -70,6 +70,59 @@ class User(db.Model):
         user = user.serialize()
         return user
 
+    def delete_user(id):
+        user = U er.query.get(id)
+        db.session.delete(user)
+        db.session.commit()
+    
+
+
+class Twitter(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20), unique=True, nullable=False)
+    token = db.Column(db.Text, nullable=False)
+    position = db.Column(db.Integer, unique=True, nullable=True)
+    is_active = db.Column(db.Boolean(), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    
+
+    def __repr__(self):
+        return f'<Twitter {id}>'
+
+    def __serialize__(self):
+        return {
+            "id": self.id,
+            "position": self.position,
+            "is_active": self.is_active
+        }
+        
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20), unique=True, nullable=False)
+    task = db.Column(db.String(80), unique=False, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+
+    def __repr__(self):
+        return f'Task: {task}'
+
+    def __serialize__(self):
+        return {
+            'UserId': self.id,
+            'task': self.task
+        }
+
+class Mail(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20), unique=True, nullable=False)
+    token = db.Column(db.Text, nullable=False)
+    position = db.Column(db.Integer, unique=True, nullable=True)
+    is_active = db.Column(db.Boolean(), nullable=False)
+    
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+
+    def __repr__(self):
+        return f'<Mail {id}>'
+
 
 class Widget(db.Model):
     id = db.Column(db.Integer, primary_key=True)
