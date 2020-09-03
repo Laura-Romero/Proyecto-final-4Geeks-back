@@ -58,8 +58,6 @@ def modify_user_info(id):
 
     return f"the user number {id} has been modified", 201
 
-
-=======
 @app.route('/user/<int:id>', methods=['DELETE'])
 def delete_user_by_id(id):
     User.delete_user(id)

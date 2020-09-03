@@ -70,8 +70,14 @@ class User(db.Model):
         user = user.serialize()
         return user
 
+    def update_user_info(user_id, info):
+        user = User.query.get(user_id)
+        for key, value in info.items():
+            setattr(user, key, value)
+        db.session.commit()
+
     def delete_user(id):
-        user = U er.query.get(id)
+        user = User.query.get(id)
         db.session.delete(user)
         db.session.commit()
     
