@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, url_for
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
-from utils import APIException, generate_sitemap
+from utils import APIException, generate_sitemap, add_user_authentification
 from admin import setup_admin
 from models import db, User
 #from models import Person
@@ -41,22 +41,33 @@ def handle_user():
 def handle_user_by_id(id):
     
     print(f"You just got the user by id = {id}")
-
-    return jsonify(User.get_user_by_id(id)), 200
+    status_user = User.get_user_by_id(id)
+    if status_user == False:
+        return "Not Found", 400
+    else:
+        return jsonify(User.get_user_by_id(id)), 200
 
 @app.route('/user', methods=['POST'])
 def create_user():
+    new_user = User()
     user_data = request.get_json()
-    User.add_user(user_data)
-    return "New user created"
+    authentification = add_user_authentification(user_data)    
 
+    if authentification == True:
+        new_user.add_user(user_data)
+        return "New user created", 200
+    else:
+        return "Oops! Looks like something went wrong", 406
 
+features/JuanLGC/PATCH
 @app.route('/user/<int:id>', methods=['PUT', 'PATCH'])
 def modify_user_info(id):
     data_to_modify = request.get_json()
     User.update_user_info(id, data_to_modify)
 
     return f"the user number {id} has been modified", 201
+
+
 
 @app.route('/user/<int:id>', methods=['DELETE'])
 def delete_user_by_id(id):
