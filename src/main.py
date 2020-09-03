@@ -52,9 +52,9 @@ def create_user():
 
     if authentification == True:
         new_user.add_user(user_data)
-        return "New user created, puto", 200
+        return "New user created", 200
     else:
-        return "Oops! Looks like something went wrong, Puto", 406
+        return "Oops! Looks like something went wrong", 406
 
 
 
