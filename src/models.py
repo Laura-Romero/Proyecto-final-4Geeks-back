@@ -59,6 +59,10 @@ class User(db.Model):
         user = user.serialize()
         return user
 
+    def delete_user(id):
+        user = U er.query.get(id)
+        db.session.delete(user)
+        db.session.commit()
     
 
 
