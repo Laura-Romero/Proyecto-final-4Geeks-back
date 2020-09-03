@@ -50,18 +50,20 @@ class User(db.Model):
         db.session.commit()
     
     def getUsers():
-        all_users = User.query.all()
+        all_users = User.query.filter_by(is_active = True)
         all_users = list(map(lambda x: x.serialize(), all_users))
         return all_users
 
     def get_user_by_id(user_id):
         user = User.query.get(user_id)
-        user = user.serialize()
-        return user
+        if user.is_active == True:
+            return user.serialize()
+        else:
+            return False
 
     def delete_user(id):
-        user = U er.query.get(id)
-        db.session.delete(user)
+        user = User.query.get(id)
+        user.is_active = False
         db.session.commit()
     
 

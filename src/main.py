@@ -41,8 +41,11 @@ def handle_user():
 def handle_user_by_id(id):
     
     print(f"You just got the user by id = {id}")
-
-    return jsonify(User.get_user_by_id(id)), 200
+    status_user = User.get_user_by_id(id)
+    if status_user == False:
+        return "Not Found", 400
+    else:
+        return jsonify(User.get_user_by_id(id)), 200
 
 @app.route('/user', methods=['POST'])
 def create_user():
