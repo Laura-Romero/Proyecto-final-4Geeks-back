@@ -50,10 +50,21 @@ def create_user():
     User.add_user(user_data)
     return "New user created"
 
+
+@app.route('/user/<int:id>', methods=['PUT', 'PATCH'])
+def modify_user_info(id):
+    data_to_modify = request.get_json()
+    User.update_user_info(id, data_to_modify)
+
+    return f"the user number {id} has been modified", 201
+
+
+=======
 @app.route('/user/<int:id>', methods=['DELETE'])
 def delete_user_by_id(id):
     User.delete_user(id)
     return "user delete"
+
 
     
 # this only runs if `$ python src/main.py` is executed

@@ -1,6 +1,19 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import cast, select, String, Text
+
+# from sqlalchemy.ext.declarative import declarative_base
+
+# Base = declarative_base()
 
 db = SQLAlchemy()
+
+association_table = db.Table('association', db.Model.metadata,
+    db.Column('user_id', db.Integer, db.ForeignKey("user.id")),
+    db.Column('widget_id', db.Integer, db.ForeignKey("widget.id")),
+    db.Column('status', db.Boolean(), nullable=False),
+    db.Column('position', db.Integer, nullable=False)
+)
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -13,13 +26,11 @@ class User(db.Model):
     country = db.Column(db.String(50), unique=False, nullable=False)
     city = db.Column(db.String(50), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
-    # CHILDREN
-    twitter = db.relationship('Twitter', lazy=True)
-    task = db.relationship('Task', lazy=True)
-    weather = db.relationship('Weather', lazy=True) 
-    mail = db.relationship('Mail', lazy=True)
-    clock = db.relationship('Clock', lazy=True)
-    compliment = db.relationship('Compliment', lazy=True)
+    # ASSOCIATION
+    widgets = db.relationship("Widget",
+                secondary=association_table,
+                back_populates="users"
+    )
     
 
     def __repr__(self):
@@ -112,60 +123,35 @@ class Mail(db.Model):
     def __repr__(self):
         return f'<Mail {id}>'
 
-    def __serialize__(self):
-        return {
-            "id": self.id,
-            "position": self.position,
-            "is_active": self.is_active
-        }
 
-class Weather(db.Model):
+class Widget(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(20), unique=True, nullable=False)
-    position = db.Column(db.Integer, unique=True, nullable=True)
-    is_active = db.Column(db.Boolean(), unique=True, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    widget_type = db.Column(db.Enum('Twitter', 'Gmail', 'Tasks', 'Weather', 'Clock', 'Compliments'), unique=True, nullable=False)
+    #ASSOCIATION
+    users = db.relationship("User",
+                secondary=association_table,
+                back_populates="widgets"
+    )
 
     def __repr__(self):
-        return f'<Weather {position}>'
+        return f'<Widget: {self.widget_type}>'
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "widget_type": self.widget_type
+        }
+class Widget_property(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    widget_property = db.Column(db.String(250), unique=False, nullable=False)
+    property_value = db.Column(db.Text, nullable=False)
+
+    def __repr__(self):
+        return f'<Widget_Property {self.widget_property}>'
     
     def __serailize__(self):
         return {
             "id": self.id,
-            "position": self.position,
-            "is_active": self.is_active
-        }
-
-class Clock(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(20), unique=True, nullable=False)
-    position = db.Column(db.Integer, unique=True, nullable=True)
-    is_active = db.Column(db.Boolean(), unique=True, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-
-    def __repr__(self):
-        return f'<Time {position}>'
-    
-    def __serailize__(self):
-        return {
-            "id": self.id,
-            "position": self.position,
-            "is_active": self.is_active
-        }
-
-class Compliment(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(20), unique=True, nullable=False)
-    position = db.Column(db.Integer, unique=True, nullable=True)
-    is_active = db.Column(db.Boolean(), unique=True, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-
-    def __repr__(self):
-        return f'<Time {position}>'
-    
-    def __serailize__(self):
-        return {
-            "id": self.id,
-            "position": self.position,
-            "is_active": self.is_active
+            "widget_property": self.widget_property,
+            "property_value": self.property_value
         }
