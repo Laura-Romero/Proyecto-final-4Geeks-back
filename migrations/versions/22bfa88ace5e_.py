@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 0de6e50c0251
+Revision ID: 22bfa88ace5e
 Revises: 
-Create Date: 2020-08-31 13:20:29.391343
+Create Date: 2020-09-03 09:45:53.258783
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '0de6e50c0251'
+revision = '22bfa88ace5e'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -34,59 +34,71 @@ def upgrade():
     )
     op.create_table('clock',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=20), nullable=False),
     sa.Column('position', sa.Integer(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('is_active'),
+    sa.UniqueConstraint('name'),
     sa.UniqueConstraint('position')
     )
     op.create_table('compliment',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=20), nullable=False),
     sa.Column('position', sa.Integer(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('is_active'),
+    sa.UniqueConstraint('name'),
     sa.UniqueConstraint('position')
     )
     op.create_table('mail',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=20), nullable=False),
     sa.Column('token', sa.Text(), nullable=False),
     sa.Column('position', sa.Integer(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name'),
     sa.UniqueConstraint('position')
     )
     op.create_table('task',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=20), nullable=False),
     sa.Column('task', sa.String(length=80), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name')
     )
     op.create_table('twitter',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=20), nullable=False),
     sa.Column('token', sa.Text(), nullable=False),
     sa.Column('position', sa.Integer(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name'),
     sa.UniqueConstraint('position')
     )
     op.create_table('weather',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=20), nullable=False),
     sa.Column('position', sa.Integer(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('is_active'),
+    sa.UniqueConstraint('name'),
     sa.UniqueConstraint('position')
     )
     # ### end Alembic commands ###

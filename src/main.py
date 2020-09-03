@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, url_for
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
-from utils import APIException, generate_sitemap
+from utils import APIException, generate_sitemap, add_user_authentification
 from admin import setup_admin
 from models import db, User
 #from models import Person
@@ -49,9 +49,15 @@ def handle_user_by_id(id):
 
 @app.route('/user', methods=['POST'])
 def create_user():
+    new_user = User()
     user_data = request.get_json()
-    User.add_user(user_data)
-    return "New user created"
+    authentification = add_user_authentification(user_data)    
+
+    if authentification == True:
+        new_user.add_user(user_data)
+        return "New user created", 200
+    else:
+        return "Oops! Looks like something went wrong", 406
 
 @app.route('/user/<int:id>', methods=['DELETE'])
 def delete_user_by_id(id):

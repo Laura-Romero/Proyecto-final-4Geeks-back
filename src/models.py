@@ -46,16 +46,17 @@ class User(db.Model):
             "country": self.country,
             "city": self.city
         }
-    
-    def add_user(user_data):
-        new_user = User()
-        new_user.username = user_data['username']
-        new_user.password = user_data['password']
-        new_user.fullname = user_data['fullname']
-        new_user.email = user_data['email']
-        new_user.country = user_data['country']
-        new_user.city = user_data['city']
-        new_user.is_active = user_data['is_active']
+    @classmethod
+    def add_user(cls, user_data):
+        new_user = cls(
+        username = user_data['username'],
+        password = user_data['password'],
+        fullname = user_data['fullname'],
+        email = user_data['email'],
+        country = user_data['country'],
+        city = user_data['city'],
+        is_active = True
+        )
 
         db.session.add(new_user)
         db.session.commit()
