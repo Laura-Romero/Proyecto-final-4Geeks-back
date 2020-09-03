@@ -41,8 +41,11 @@ def handle_user():
 def handle_user_by_id(id):
     
     print(f"You just got the user by id = {id}")
-
-    return jsonify(User.get_user_by_id(id)), 200
+    status_user = User.get_user_by_id(id)
+    if status_user == False:
+        return "Not Found", 400
+    else:
+        return jsonify(User.get_user_by_id(id)), 200
 
 @app.route('/user', methods=['POST'])
 def create_user():
@@ -50,7 +53,10 @@ def create_user():
     User.add_user(user_data)
     return "New user created"
 
-
+@app.route('/user/<int:id>', methods=['DELETE'])
+def delete_user_by_id(id):
+    User.delete_user(id)
+    return "user delete"
 
     
 # this only runs if `$ python src/main.py` is executed

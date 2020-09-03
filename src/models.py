@@ -61,12 +61,44 @@ class User(db.Model):
         db.session.commit()
     
     def getUsers():
-        all_users = User.query.all()
+        all_users = User.query.filter_by(is_active = True)
         all_users = list(map(lambda x: x.serialize(), all_users))
         return all_users
 
     def get_user_by_id(user_id):
         user = User.query.get(user_id)
+        if user.is_active == True:
+            return user.serialize()
+        else:
+            return False
+
+    def delete_user(id):
+        user = User.query.get(id)
+        user.is_active = False
+        db.session.commit()
+    
+
+
+class Twitter(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20), unique=True, nullable=False)
+    token = db.Column(db.Text, nullable=False)
+    position = db.Column(db.Integer, unique=True, nullable=True)
+    is_active = db.Column(db.Boolean(), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    
+
+    def __repr__(self):
+        return f'<Twitter {id}>'
+
+    def __serialize__(self):
+        return {
+            "id": self.id,
+            "position": self.position,
+            "is_active": self.is_active
+        }
+        
+class Task(db.Model):
         user = user.serialize()
         return user
 
