@@ -24,12 +24,11 @@ association_table = db.Table('association', db.Model.metadata,
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(25), unique=True, nullable=False)
-    # password = db.Column(
-    #     PasswordType(schemes=['pbkdf2_sha512']),
-    #     unique=False,
-    #     nullable=False,
-    # )
-    password = db.Column(db.Integer)
+    password = db.Column(
+        PasswordType(schemes=['pbkdf2_sha512']),
+        unique=False,
+        nullable=False,
+    )
     fullname = db.Column(db.String(50), unique=False, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     gender = db.Column(db.String(30), unique=False, nullable=True)
