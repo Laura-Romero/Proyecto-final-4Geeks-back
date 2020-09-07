@@ -37,11 +37,10 @@ def sitemap():
     return generate_sitemap(app)
 
 @app.route('/user', methods=['GET'])
-@jwt_required
+
 def handle_user():
-    current_user = get_jwt_identity()
-    return jsonify(logged_in_as=current_user), jsonify(User.getUsers()), 200
-    # return jsonify(User.getUsers()), 200
+    return  jsonify(User.getUsers()), 200
+    
 
 @app.route('/user/<int:id>', methods=['GET'])
 def handle_user_by_id(id):
@@ -70,7 +69,7 @@ def modify_user_info(id):
     User.update_user_info(id, data_to_modify)
 
     return f"the user number {id} has been modified", 201
-###########################################################
+
 @app.route('/user/<int:id>', methods=['DELETE'])
 def delete_user_by_id(id):
     User.delete_user(id)
@@ -104,24 +103,6 @@ def delete_widget_props(id):
 
     return "props deleted", 200
 
-@app.route('/login', methods=['POST'])
-def login():
-    if not request.is_json:
-        return jsonify({"msg": "Missing JSON in request"}), 400
-
-    username = request.json.get('username', None)
-    password = request.json.get('password', None)
-    if not username:
-        return jsonify({"msg": "Missing username parameter"}), 400
-    if not password:
-        return jsonify({"msg": "Missing password parameter"}), 400
-
-    if username != 'test' or password != 'test':
-        return jsonify({"msg": "Bad username or password"}), 401
-
-    # Identity can be any data that is json serializable
-    access_token = create_access_token(identity=username)
-    return jsonify(access_token=access_token), 200
 
 
 
