@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap, add_user_authentification
 from admin import setup_admin
-from models import db, User
+from models import db, User, Widget
 #from models import Person
 
 app = Flask(__name__)
@@ -47,7 +47,7 @@ def handle_user_by_id(id):
     else:
         return jsonify(User.get_user_by_id(id)), 200
 
-@app.route('/user', methods=['POST'])
+@app.route('/users', methods=['POST'])
 def create_user():
     new_user = User()
     user_data = request.get_json()
@@ -69,8 +69,28 @@ def modify_user_info(id):
 @app.route('/user/<int:id>', methods=['DELETE'])
 def delete_user_by_id(id):
     User.delete_user(id)
-    return "user delete"
-  
+    return "user delete", 202
+
+@app.route('/widgets', methods=['GET'])
+def handle_widgets():
+    return jsonify(Widget.get_widget()), 200
+
+@app.route('/widget/<int:id>', methods=['GET'])
+def handle_widget_by_user(id):
+    return jsonify(Widget.get_widget_by_user(id))
+
+@app.route('/widget/<int:id>', methods=['DELETE'])
+def delete_widget_by_id(id):
+    Widget.delete_widget(id)
+    return "widget delete", 202
+
+#@app.route('/widget/<int:id>', methods=['POST'])
+#def add_new_widget():
+#    new_widget = Widget()
+#    widget_data = request.get_json()
+#    authentification = add_widget_authentification(widget_data)
+
+    
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))

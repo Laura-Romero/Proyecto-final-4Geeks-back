@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import cast, select, String, Text
+from sqlalchemy import cast, select, String, Text, join
 
 # from sqlalchemy.ext.declarative import declarative_base
 
@@ -21,8 +21,6 @@ class User(db.Model):
     password = db.Column(db.String(80), unique=False, nullable=False)
     fullname = db.Column(db.String(50), unique=False, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    gender = db.Column(db.String(30), unique=False, nullable=True)
-    twitter = db.Column(db.String(30), unique=True, nullable=True)
     country = db.Column(db.String(50), unique=False, nullable=False)
     city = db.Column(db.String(50), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
@@ -42,7 +40,6 @@ class User(db.Model):
             "username": self.username,
             "fullname": self.fullname,
             "email": self.email,
-            "twitter": self.twitter,
             "country": self.country,
             "city": self.city
         }
@@ -102,6 +99,33 @@ class Widget(db.Model):
             "id": self.id,
             "widget_type": self.widget_type
         }
+
+    def get_widget():
+        all_widget = Widget.query.all()
+        all_widget = list(map(lambda x: x.serialize(), all_widget))
+        return all_widget  
+    
+    def get_widget_by_user(id):
+        widget_by_user = db.session.query(User.id, Widget.widget_type)
+        join_widget = db.session.query.join(Widget)
+        return join_widget.filter(Widget.widget_type == id).all()
+
+
+
+    def delete_widget( widget_id):
+        widget= Widget.query.get(widget_id)
+        db.session.delete(widget)
+        db.session.commit()
+    
+   # @classmethod
+    #def add_widget(cls, widget_data):
+     #   new_widget = cls(
+      #      widget_type = new_data['Twitter', 'Gmail', 'Task', 'Weather', 'Clock', 'Compliments']
+        # )
+        #db.session.add(new_widget)
+        #db.session.commit()
+      
+
 class Widget_property(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     widget_property = db.Column(db.String(250), unique=False, nullable=False)
