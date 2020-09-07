@@ -3,8 +3,6 @@ from sqlalchemy import cast, select, String, Text
 from sqlalchemy_utils import PasswordType
 
 
-
-
 # from sqlalchemy.ext.declarative import declarative_base
 
 # Base = declarative_base()
