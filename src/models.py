@@ -80,9 +80,24 @@ class User(db.Model):
 
     def update_user_info(user_id, new_data):
         user = User.query.get(user_id)
+        print(user)
         for key, value in new_data.items():
             setattr(user, key, value)
         db.session.commit()
+    
+    def check_user_login(user_name, passw):
+        user = User.query.filter(User.username == user_name).one_or_none()
+        password = user.password
+        print(password)
+
+        if user != None:
+            if passw == password:
+                return True
+            else:
+                return False
+        else:
+            return False
+
 
 
 class Widget(db.Model):

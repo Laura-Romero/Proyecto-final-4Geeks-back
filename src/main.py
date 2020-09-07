@@ -9,12 +9,18 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap, add_user_authentification
 from admin import setup_admin
 from models import db, User
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token,
+    get_jwt_identity
+)
 #from models import Person
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_CONNECTION_STRING')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
+jwt = JWTManager(app)
 MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
@@ -31,16 +37,11 @@ def sitemap():
     return generate_sitemap(app)
 
 @app.route('/user', methods=['GET'])
-def handle_user():
-
-    print("You just got every single user")
-
+def get_every_user():
     return jsonify(User.getUsers()), 200
 
 @app.route('/user/<int:id>', methods=['GET'])
 def handle_user_by_id(id):
-    
-    print(f"You just got the user by id = {id}")
     status_user = User.get_user_by_id(id)
     if status_user == False:
         return "Not Found", 400
@@ -70,6 +71,27 @@ def modify_user_info(id):
 def delete_user_by_id(id):
     User.delete_user(id)
     return "user delete"
+
+@app.route('/login', methods=['POST'])
+def login():
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+
+    if not username:
+        return jsonify({"msg": "Missing username parameter"}), 400
+    if not password:
+        return jsonify({"msg": "Missing password parameter"}), 400
+
+    check_login = User.check_user_login(username, password)
+    
+    if check_login == True:
+        access_token = create_access_token(identity=username)
+        return jsonify(access_token=access_token), 200
+    else:
+        return "Wrong password or username"
   
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
