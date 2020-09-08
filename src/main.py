@@ -33,14 +33,13 @@ def sitemap():
 @app.route('/user', methods=['GET'])
 def handle_user():
 
-    print("You just got every single user")
+   
 
     return jsonify(User.getUsers()), 200
 
 @app.route('/user/<int:id>', methods=['GET'])
 def handle_user_by_id(id):
     
-    print(f"You just got the user by id = {id}")
     status_user = User.get_user_by_id(id)
     if status_user == False:
         return "Not Found", 400
