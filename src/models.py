@@ -1,5 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import cast, select, String, Text
+from flask_login import UserMixin
+
 
 # from sqlalchemy.ext.declarative import declarative_base
 
@@ -83,6 +85,42 @@ class User(db.Model):
         for key, value in new_data.items():
             setattr(user, key, value)
         db.session.commit()
+
+##############################################################################################
+class UserOAuth(db.Model, UserMixin):
+    id = db.Column(db.String(767), primary_key=True)
+    email = db.Column(db.String(767), unique=True, nullable=False)
+    name = db.Column(db.Text(), nullable=False)
+    profile_pic = db.Column(db.Text(), nullable=False)
+
+
+    def __init__(self, id_, name, email, profile_pic):
+        self.id = id_
+        self.name = name
+        self.email = email
+        self.profile_pic = profile_pic
+
+
+
+    @classmethod
+    def create(cls, id_, name, email, profile_pic):
+        user = cls(id_=id_, name=name, email=email, profile_pic=profile_pic)
+        db.session.add(user)
+        db.session.commit()
+        return user
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "email": self.email,
+        }
+
+    @classmethod
+    def get(cls, user_id):
+        return cls.query.filter_by(id=user_id).one_or_none()
+
+###############################################################################    
 
 
 class Widget(db.Model):
