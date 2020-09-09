@@ -72,6 +72,11 @@ class User(db.Model):
             return user.serialize()
         else:
             return False
+    def get_user_by_username(user_name):
+        
+        user = User.query.filter_by(username = user_name).first()
+        user = user.serialize()
+        return user
 
     def delete_user(id):
         user = User.query.get(id)

@@ -2,29 +2,54 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 import os
-from flask import Flask, request, jsonify, url_for
+from flask import Flask, request, jsonify, url_for, make_response
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap, add_user_authentification
 from admin import setup_admin
 from models import db, User
-from flask_jwt_extended import (
-    JWTManager, jwt_required, create_access_token,
-    get_jwt_identity
-)
+import jwt
+from functools import wraps
 #from models import Person
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
+app.config['SECRET_KEY'] = 'thisissecret'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'https://3000-ed2fec90-e5b0-4bf7-9da7-ce618730095a.ws-eu01.gitpod.io'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_CONNECTION_STRING')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
-jwt = JWTManager(app)
+
 MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
 setup_admin(app)
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+
+        if 'X-Access-Point' in request.headers:
+            token = request.headers['X-Access-Point']
+        
+        if not token:
+            return jsonify({'message': 'token missing'}, 401)
+        
+        try:
+            
+            data = jwt.decode(token, app.config['SECRET_KEY'])
+            current_user = User.get_user_by_username(data['username'])
+            
+        except:
+            return jsonify({'message': 'token is invalid'}), 401
+
+    
+        return f(current_user, *args, **kwargs)
+    
+    return decorated
+
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
@@ -41,8 +66,14 @@ def get_every_user():
     return jsonify(User.getUsers()), 200
 
 @app.route('/user/<int:id>', methods=['GET'])
-def handle_user_by_id(id):
+@token_required
+def handle_user_by_id(current_user, id):
+
     status_user = User.get_user_by_id(id)
+    
+    if current_user['username'] != status_user['username']:
+        return jsonify({'message': 'cannot perfom function'})
+        
     if status_user == False:
         return "Not Found", 400
     else:
@@ -74,24 +105,22 @@ def delete_user_by_id(id):
 
 @app.route('/login', methods=['POST'])
 def login():
-    if not request.is_json:
-        return jsonify({"msg": "Missing JSON in request"}), 400
+    auth = request.authorization
+    if not auth or not auth.username or not auth.password:
+        return make_response('Could not verifyxD', 401, {'WWW-Authenticate': 'Basic realm = "Login required!"'})
 
-    username = request.json.get('username', None)
-    password = request.json.get('password', None)
+    user = User.query.filter_by(username=auth.username).first()
 
-    if not username:
-        return jsonify({"msg": "Missing username parameter"}), 400
-    if not password:
-        return jsonify({"msg": "Missing password parameter"}), 400
+    if not user:
+        return jsonify({'message': 'no user found'})
 
-    check_login = User.check_user_login(username, password)
-    
-    if check_login == True:
-        access_token = create_access_token(identity=username)
-        return jsonify(access_token=access_token), 200
-    else:
-        return "Wrong password or username"
+    if user.password == auth.password:
+        token = jwt.encode({'username': user.username}, app.config['SECRET_KEY'])
+        return jsonify({'token': token.decode('UTF-8')})
+
+    return make_response('Could not verify', 401, {'WWW-Authenticate': 'Basic realm = "Login required!"'})
+
+
   
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
