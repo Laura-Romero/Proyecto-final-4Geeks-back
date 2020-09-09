@@ -92,6 +92,7 @@ def create_user():
         return "Oops! Looks like something went wrong", 406
 
 @app.route('/user/<int:id>', methods=['PUT', 'PATCH'])
+@token_required
 def modify_user_info(id):
     data_to_modify = request.get_json()
     User.update_user_info(id, data_to_modify)
@@ -107,7 +108,7 @@ def delete_user_by_id(id):
 def login():
     auth = request.authorization
     if not auth or not auth.username or not auth.password:
-        return make_response('Could not verifyxD', 401, {'WWW-Authenticate': 'Basic realm = "Login required!"'})
+        return make_response('Could not verify', 401, {'WWW-Authenticate': 'Basic realm = "Login required!"'})
 
     user = User.query.filter_by(username=auth.username).first()
 
