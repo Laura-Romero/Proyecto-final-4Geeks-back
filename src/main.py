@@ -32,10 +32,7 @@ def sitemap():
 
 @app.route('/user', methods=['GET'])
 def handle_user():
-
-   
-
-    return jsonify(User.getUsers()), 200
+    return User.getUsers(), 200
 
 @app.route('/user/<int:id>', methods=['GET'])
 def handle_user_by_id(id):

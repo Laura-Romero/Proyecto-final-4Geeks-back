@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import cast, select, String, Text
-from sqlalchemy_utils import PasswordType
-
+from sqlalchemy_utils import PasswordType, force_auto_coercion
+from flask_login import UserMixin
 
 # from sqlalchemy.ext.declarative import declarative_base
 
@@ -10,6 +10,7 @@ from sqlalchemy_utils import PasswordType
 
 
 db = SQLAlchemy()
+force_auto_coercion()
 
 association_table = db.Table('association', db.Model.metadata,
     db.Column('user_id', db.Integer, db.ForeignKey("user.id")),
@@ -23,7 +24,14 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(25), unique=True, nullable=False)
     password = db.Column(
-        PasswordType(schemes=['pbkdf2_sha512']),
+        PasswordType(
+            max_length=60,
+            schemes=[
+                'pbkdf2_sha512',
+                'md5_crypt'
+            ],
+            deprecated=['md5_crypt']
+        ),
         unique=False,
         nullable=False,
     )
@@ -71,11 +79,14 @@ class User(db.Model):
     
     def getUsers():
         all_users = User.query.filter_by(is_active = True)
+        # print(all_users)
         all_users = list(map(lambda x: x.serialize(), all_users))
+        print(all_users)
         return all_users
 
     def get_user_by_id(user_id):
         user = User.query.get(user_id)
+        
         if user.is_active == True:
             return user.serialize()
         else:
