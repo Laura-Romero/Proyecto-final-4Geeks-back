@@ -27,10 +27,11 @@ CORS(app)
 setup_admin(app)
 
 def token_required(f):
+    #Este wraps debes importarlo
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
-
+        #el header tiene dentro un objeto, X-Access-Point es la key
         if 'X-Access-Point' in request.headers:
             token = request.headers['X-Access-Point']
         
@@ -38,7 +39,7 @@ def token_required(f):
             return jsonify({'message': 'token missing'}, 401)
         
         try:
-            
+         
             data = jwt.decode(token, app.config['SECRET_KEY'])
             current_user = User.get_user_by_username(data['username'])
             
