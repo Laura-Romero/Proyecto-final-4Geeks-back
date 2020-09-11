@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import cast, select, String, Text
-from sqlalchemy_utils import PasswordType, force_auto_coercion
 from flask_login import UserMixin
+import bcrypt
 
 # from sqlalchemy.ext.declarative import declarative_base
 
@@ -10,7 +10,6 @@ from flask_login import UserMixin
 
 
 db = SQLAlchemy()
-force_auto_coercion()
 
 association_table = db.Table('association', db.Model.metadata,
     db.Column('user_id', db.Integer, db.ForeignKey("user.id")),
@@ -23,18 +22,7 @@ association_table = db.Table('association', db.Model.metadata,
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(25), unique=True, nullable=False)
-    password = db.Column(
-        PasswordType(
-            max_length=60,
-            schemes=[
-                'pbkdf2_sha512',
-                'md5_crypt'
-            ],
-            deprecated=['md5_crypt']
-        ),
-        unique=False,
-        nullable=False,
-    )
+    password = db.Column(db.String(250), unique=False, nullable=False)
     fullname = db.Column(db.String(50), unique=False, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     gender = db.Column(db.String(30), unique=False, nullable=True)
@@ -66,7 +54,7 @@ class User(db.Model):
     def add_user(cls, user_data):
         new_user = cls(
         username = user_data['username'],
-        password = user_data['password'],
+        password = bcrypt.hashpw(user_data['password'].encode('utf-8'), bcrypt.gensalt()),
         fullname = user_data['fullname'],
         email = user_data['email'],
         country = user_data['country'],
@@ -79,9 +67,7 @@ class User(db.Model):
     
     def getUsers():
         all_users = User.query.filter_by(is_active = True)
-        # print(all_users)
         all_users = list(map(lambda x: x.serialize(), all_users))
-        print(all_users)
         return all_users
 
     def get_user_by_id(user_id):
