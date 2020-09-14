@@ -21,8 +21,6 @@ class User(db.Model):
     password = db.Column(db.String(80), unique=False, nullable=False)
     fullname = db.Column(db.String(50), unique=False, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    gender = db.Column(db.String(30), unique=False, nullable=True)
-    twitter = db.Column(db.String(30), unique=True, nullable=True)
     country = db.Column(db.String(50), unique=False, nullable=False)
     city = db.Column(db.String(50), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
@@ -89,11 +87,13 @@ class Widget(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     widget_type = db.Column(db.Enum('Twitter', 'Gmail', 'Tasks', 'Weather', 'Clock', 'Compliments'), unique=True, nullable=False)
     #ASSOCIATION
+    widget_properties = db.relationship("Widget_property", lazy=True)
+
     users = db.relationship("User",
                 secondary=association_table,
                 back_populates="widgets"
     )
-
+    
     def __repr__(self):
         return f'<Widget: {self.widget_type}>'
 
@@ -106,6 +106,7 @@ class Widget_property(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     widget_property = db.Column(db.String(250), unique=False, nullable=False)
     property_value = db.Column(db.Text, nullable=False)
+    widgets_id = db.Column(db.Integer, db.ForeignKey ("widget.id"))
 
     def __repr__(self):
         return f'<Widget_Property {self.widget_property}>'
