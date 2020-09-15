@@ -9,6 +9,8 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap, add_user_authentification
 from admin import setup_admin
 from models import db, User
+import twitter
+import tweepy
 #from models import Person
 
 app = Flask(__name__)
@@ -30,6 +32,18 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+@app.route('/twitter')
+def Get_tweets():
+    auth = twitter.twitter_auth()
+    
+    client = twitter.get_twitter_client(auth)
+
+    if __name__ == 'main':
+        user = 'Jimena_y_yo'
+        tw_client = client
+        users_locs = [[tweet.user.screen_name, tweet.text] for tweet in tweepy.Cursor(client.home_timeline, screen_name=user).items(10)]
+    return jsonify(users_locs)
+    
 @app.route('/user', methods=['GET'])
 def handle_user():
 
@@ -52,7 +66,7 @@ def create_user():
     new_user = User()
     user_data = request.get_json()
     authentification = add_user_authentification(user_data)    
-
+    
     if authentification == True:
         new_user.add_user(user_data)
         return "New user created", 200
