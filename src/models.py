@@ -17,17 +17,17 @@ association_table = db.Table('association', db.Model.metadata,
 )
 
 
-class User(db.Model):
+class User(db.Model,  UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(25), unique=True, nullable=False)
-    password = db.Column(db.String(80), unique=False, nullable=False)
+    password = db.Column(db.String(80), unique=False, nullable=True)
     fullname = db.Column(db.String(50), unique=False, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     gender = db.Column(db.String(30), unique=False, nullable=True)
     twitter = db.Column(db.String(30), unique=True, nullable=True)
-    country = db.Column(db.String(50), unique=False, nullable=False)
-    city = db.Column(db.String(50), unique=False, nullable=False)
-    is_active = db.Column(db.Boolean(), unique=False, nullable=False)
+    country = db.Column(db.String(50), unique=False, nullable=True)
+    city = db.Column(db.String(50), unique=False, nullable=True)
+    is_active = db.Column(db.Boolean(), unique=False, nullable=True)
     # ASSOCIATION
     widgets = db.relationship("Widget",
                 secondary=association_table,
@@ -48,6 +48,7 @@ class User(db.Model):
             "country": self.country,
             "city": self.city
         }
+
     @classmethod
     def add_user(cls, user_data):
         new_user = cls(
@@ -86,21 +87,6 @@ class User(db.Model):
             setattr(user, key, value)
         db.session.commit()
 
-class UserOAuth(db.Model, UserMixin):
-    id = db.Column(db.String(767), primary_key=True)
-    email = db.Column(db.String(767), unique=True, nullable=False)
-    name = db.Column(db.Text(), nullable=False)
-    profile_pic = db.Column(db.Text(), nullable=False)
-
-
-    def __init__(self, id_, name, email, profile_pic):
-        self.id = id_
-        self.name = name
-        self.email = email
-        self.profile_pic = profile_pic
-
-
-
     @classmethod
     def create(cls, id_, name, email, profile_pic):
         user = cls(id_=id_, name=name, email=email, profile_pic=profile_pic)
@@ -119,7 +105,11 @@ class UserOAuth(db.Model, UserMixin):
     def get(cls, user_id):
         return cls.query.filter_by(id=user_id).one_or_none()
 
-###############################################################################    
+class UserOAuth(db.Model,):
+    id = db.Column(db.String(767), primary_key=True)
+    email = db.Column(db.String(767), unique=True, nullable=False)
+    name = db.Column(db.Text(), nullable=False)
+    profile_pic = db.Column(db.Text(), nullable=False)
 
 
 class Widget(db.Model):

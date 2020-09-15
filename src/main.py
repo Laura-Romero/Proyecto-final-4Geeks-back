@@ -1,8 +1,16 @@
 import os
+import json
+import os
+import sqlite3
+import requests
 from flask import Flask, request, jsonify, url_for, redirect
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
+from oauthlib.oauth2 import WebApplicationClient
+from utils import APIException, generate_sitemap, add_user_authentification
+from admin import setup_admin
+from models import db, User, UserOAuth
 from flask_login import (
     LoginManager,
     current_user,
@@ -10,14 +18,6 @@ from flask_login import (
     login_user,
     logout_user,
 )
-from oauthlib.oauth2 import WebApplicationClient
-import requests
-from utils import APIException, generate_sitemap, add_user_authentification
-from admin import setup_admin
-from models import db, User, UserOAuth
-import json
-import os
-import sqlite3
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", None)
@@ -38,11 +38,8 @@ setup_admin(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-# OAuth 2 client setup
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
-print(client, "CLIEEEENT")
 
-# Flask-Login helper to retrieve a user from our db
 @login_manager.user_loader
 def load_user(user_id):
     return UserOAuth.get(user_id)
@@ -102,7 +99,7 @@ def delete_user_by_id(id):
     return "user delete"
 
 @app.route("/login")
-def login():
+def loginOAuth():
     #return request.base_url, 200
     # Find out what URL to hit for Google login
     google_provider_cfg = get_google_provider_cfg()
@@ -165,13 +162,14 @@ def callback():
 
     # Create a user in your db with the information provided
     # by Google
-    user = UserOAuth(
-        id_=unique_id, name=users_name, email=users_email, profile_pic=picture
+    user = User(
+       fullname=users_name, email=users_email, username=users_name
     )
+    #LINEA 170 CAMBIAR QUERY POR FUNCION GET BY EMAIL DESPUES DEL MERGE
     # Doesn't exist? Add it to the database.
-    if not user.id:
-        
-        UserOAuth.create(unique_id, users_name, users_email, picture)
+    if not user.query.filter_by(email=users_email).first():
+        db.session.add(user)
+        db.session.commit()
 
     # Begin user session by logging the user in
     login_user(user)
