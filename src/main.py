@@ -39,7 +39,7 @@ def Get_tweets():
     client = twitter.get_twitter_client(auth)
 
     if __name__ == 'main':
-        user = 'Jimena_y_yo'
+        user = 'JuanGCardinale'
         tw_client = client
         users_locs = [[tweet.user.screen_name, tweet.text] for tweet in tweepy.Cursor(client.home_timeline, screen_name=user).items(10)]
     return jsonify(users_locs)
