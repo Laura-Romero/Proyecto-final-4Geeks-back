@@ -46,10 +46,7 @@ def login():
 
     if not user:
         return 'User not found', 400
-    b = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()),
 
-    print(b, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", user.password )
-    # checked = bcrypt.checkpw(b, user.password)
     if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
         return f'Welcome back {username}'
     else:
