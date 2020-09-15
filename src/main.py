@@ -1,6 +1,3 @@
-"""
-This module takes care of starting the API Server, Loading the DB and Adding the endpoints
-"""
 import os
 from flask import Flask, request, jsonify, url_for, redirect
 from flask_migrate import Migrate
@@ -43,6 +40,7 @@ login_manager.init_app(app)
 
 # OAuth 2 client setup
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
+print(client, "CLIEEEENT")
 
 # Flask-Login helper to retrieve a user from our db
 @login_manager.user_loader
