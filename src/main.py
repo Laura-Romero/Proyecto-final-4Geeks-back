@@ -1,7 +1,5 @@
-"""
-This module takes care of starting the API Server, Loading the DB and Adding the endpoints
-"""
 import os
+import jwt
 from flask import Flask, request, jsonify, url_for, make_response
 from flask_migrate import Migrate
 from flask_swagger import swagger
@@ -9,17 +7,13 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap, add_user_authentification
 from admin import setup_admin
 from models import db, User
-import jwt
 from functools import wraps
-#from models import Person
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
-app.config['SECRET_KEY'] = 'thisissecret'
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'https://3000-ed2fec90-e5b0-4bf7-9da7-ce618730095a.ws-eu01.gitpod.io'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEYS')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_CONNECTION_STRING')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
 
 MIGRATE = Migrate(app, db)
 db.init_app(app)
