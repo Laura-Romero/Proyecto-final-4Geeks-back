@@ -1,4 +1,5 @@
 from flask import jsonify, url_for
+from flask_login import current_user
 
 class APIException(Exception):
     status_code = 400
@@ -31,6 +32,16 @@ def generate_sitemap(app):
                 links.append(url)
 
     links_html = "".join(["<li><a href='" + y + "'>" + y + "</a></li>" for y in links])
+
+    if current_user.is_authenticated:
+        login_html = f"<p>Hello, {current_user.name}! You're logged in! " \
+            "Email: {current_user.email}</p>" \
+            "<div><p>Google Profile Picture:</p>" \
+            f'<img src="{current_user.profile_pic}" alt="Google profile pic"></img></div>' \
+            '<a class="button" href="/logout">Logout</a>'
+    else:
+        login_html = '<a class="button" href="/login">Google Login</a>'
+
     return """
         <div style="text-align: center;">
         <img style="max-height: 80px" src='https://ucarecdn.com/3a0e7d8b-25f3-4e2f-add2-016064b04075/rigobaby.jpg' />
@@ -55,8 +66,7 @@ def add_user_authentification(user_info):
 def check_username(user_info):
     username = user_info.get('username')
     if len(username) > 5:
-        if username != "":
-            return True
+        return True
     else:
         return False, "Username can't be empty"
 
@@ -75,7 +85,7 @@ def check_password(user_info):
         if char.isdigit() == True:
             check_numbers = True
 
-    if check_upper_case == False and check_lower_case == False and check_alphanum == False and check_length >= 8 and check_spaces == False and check_numbers == True:
+    if check_upper_case == False and check_lower_case == False and check_alphanum == False and check_spaces == False and check_numbers == True:
         return True
         print("upper: ", check_upper_case, " lower: ", check_lower_case, " alnum: ", check_alphanum, " length: ", check_length, " spaces: ", check_spaces, " numbers: ", check_numbers )
     else:
