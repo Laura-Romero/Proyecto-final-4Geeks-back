@@ -9,6 +9,7 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap, add_user_authentification
 from admin import setup_admin
 from models import db, User
+import bcrypt
 #from models import Person
 
 app = Flask(__name__)
@@ -30,17 +31,34 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+@app.route('/login', methods=['POST'])
+def login():
+    
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+
+    if not username:
+        return 'Missing email', 400
+    if not password:
+        return 'Missing password', 400
+
+    user = User.query.filter_by(username=username).first()
+
+    if not user:
+        return 'User not found', 400
+
+    if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+        return f'Welcome back {username}'
+    else:
+        return 'Wrong password'
+
 @app.route('/user', methods=['GET'])
 def handle_user():
-
-    print("You just got every single user")
-
     return jsonify(User.getUsers()), 200
 
 @app.route('/user/<int:id>', methods=['GET'])
 def handle_user_by_id(id):
     
-    print(f"You just got the user by id = {id}")
     status_user = User.get_user_by_id(id)
     if status_user == False:
         return "Not Found", 400
@@ -51,7 +69,14 @@ def handle_user_by_id(id):
 def create_user():
     new_user = User()
     user_data = request.get_json()
-    authentification = add_user_authentification(user_data)    
+    authentification = add_user_authentification(user_data)
+    check_new_username = request.json.get('username', None)
+    check_new_password = request.json.get('password', None)
+
+    if not check_new_username:
+        return 'Missing username', 400
+    if not check_new_password:
+        return 'Missing Password', 400    
 
     if authentification == True:
         new_user.add_user(user_data)

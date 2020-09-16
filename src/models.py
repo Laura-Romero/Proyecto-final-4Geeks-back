@@ -1,9 +1,13 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import cast, select, String, Text
+from flask_login import UserMixin
+import bcrypt
 
 # from sqlalchemy.ext.declarative import declarative_base
 
 # Base = declarative_base()
+
+
 
 db = SQLAlchemy()
 
@@ -18,7 +22,7 @@ association_table = db.Table('association', db.Model.metadata,
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(25), unique=True, nullable=False)
-    password = db.Column(db.String(80), unique=False, nullable=False)
+    password = db.Column(db.String(250), unique=False, nullable=False)
     fullname = db.Column(db.String(50), unique=False, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     gender = db.Column(db.String(30), unique=False, nullable=True)
@@ -50,7 +54,7 @@ class User(db.Model):
     def add_user(cls, user_data):
         new_user = cls(
         username = user_data['username'],
-        password = user_data['password'],
+        password = bcrypt.hashpw(user_data['password'].encode('utf-8'), bcrypt.gensalt()),
         fullname = user_data['fullname'],
         email = user_data['email'],
         country = user_data['country'],
@@ -68,6 +72,7 @@ class User(db.Model):
 
     def get_user_by_id(user_id):
         user = User.query.get(user_id)
+        
         if user.is_active == True:
             return user.serialize()
         else:
