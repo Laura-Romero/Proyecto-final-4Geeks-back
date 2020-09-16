@@ -6,10 +6,10 @@ owm = OWM('your-free-api-key', config_dict)
 data = {
         "api_key": "4cd5539f8e0617ff4cc0a570dd24742a",
         "subscription_type": "Free",
-        "language": "ru",
+        "language": "es",
         "connection": {
             "use_ssl": True,
             "verify_ssl_certs": True,
-            "timeout_secs": 1
+            "timeout_secs": 600
         }
     }
