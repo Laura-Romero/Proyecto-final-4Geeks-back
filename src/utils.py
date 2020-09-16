@@ -66,8 +66,7 @@ def add_user_authentification(user_info):
 def check_username(user_info):
     username = user_info.get('username')
     if len(username) > 5:
-        if username != "":
-            return True
+        return True
     else:
         return False, "Username can't be empty"
 

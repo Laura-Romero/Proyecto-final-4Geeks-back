@@ -5,16 +5,20 @@ import sqlite3
 import requests
 import jwt
 import bcrypt
-
-
 from flask import Flask, request, jsonify, url_for, redirect,  make_response
+
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token,
+    get_jwt_identity
+)
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
 from oauthlib.oauth2 import WebApplicationClient
 from utils import APIException, generate_sitemap, add_user_authentification
 from admin import setup_admin
-from models import db, User
+
+from models import db, User, Widget_property
 from functools import wraps
 from flask_login import (
     LoginManager,
@@ -29,6 +33,7 @@ GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", None)
 GOOGLE_DISCOVERY_URL = (
     "https://accounts.google.com/.well-known/openid-configuration"
 )
+
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -160,6 +165,35 @@ def delete_user_by_id(id):
     User.delete_user(id)
     return "user delete"
 
+
+@app.route('/widgets/<int:id>', methods=['GET'])
+def get_properties_by_widget_id(id):
+
+    widget_props = Widget_property.get_widget_properties(id)
+    if widget_props == False:
+        return "NOT FOUND", 404
+    else:
+        return jsonify(widget_props), 200
+
+@app.route('/widgets/<int:id>/properties', methods=['POST'])
+def add_properties_to_widget(id):
+    new_props = Widget_property()
+    prop_data = request.get_json()    
+    new_props.set_prop(id, prop_data)
+    return "New props added", 200   
+
+@app.route('/widgets/<int:id>/properties', methods=['PUT', 'PATCH'])
+def modify_properties(id):
+    data_to_modify = request.get_json()
+    Widget_property.update_props(id, data_to_modify)
+
+    return f"the property of the widget number {id} has been modified", 201
+
+@app.route('/widgets/<int:id>/properties', methods=['DELETE'])
+def delete_widget_props(id):
+
+    return "props deleted", 200
+
 @app.route("/login")
 def loginOAuth():
     #return request.base_url, 200
@@ -266,9 +300,6 @@ def login():
 
     return make_response('Could not verify', 401, {'WWW-Authenticate': 'Basic realm = "Login required!"'})
 
-
-
-  
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
