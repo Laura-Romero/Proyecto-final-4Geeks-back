@@ -5,6 +5,9 @@ import sqlite3
 import requests
 import jwt
 import bcrypt
+import twitter
+import tweepy
+
 from flask import Flask, request, jsonify, url_for, redirect,  make_response
 
 from flask_jwt_extended import (
@@ -17,7 +20,6 @@ from flask_cors import CORS
 from oauthlib.oauth2 import WebApplicationClient
 from utils import APIException, generate_sitemap, add_user_authentification
 from admin import setup_admin
-
 from models import db, User, Widget_property
 from functools import wraps
 from flask_login import (
@@ -94,11 +96,25 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+@app.route('/twitter')
+def Get_tweets():
+    auth = twitter.twitter_auth()
+    
+    client = twitter.get_twitter_client(auth)
+
+    if __name__ == 'main':
+        user = 'JuanGCardinale'
+        tw_client = client
+        users_locs = [[tweet.user.screen_name, tweet.text] for tweet in tweepy.Cursor(client.home_timeline, screen_name=user).items(10)]
+    return jsonify(users_locs)
+    
+
 @app.route('/login', methods=['POST'])
 def login():
     
     username = request.json.get('username', None)
     password = request.json.get('password', None)
+
 
     if not username:
         return 'Missing email', 400
@@ -145,7 +161,6 @@ def create_user():
         return 'Missing username', 400
     if not check_new_password:
         return 'Missing Password', 400    
-
     if authentification == True:
         new_user.add_user(user_data)
         return "New user created", 200
