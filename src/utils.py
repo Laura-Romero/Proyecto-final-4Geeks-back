@@ -86,7 +86,7 @@ def check_password(user_info):
         if char.isdigit() == True:
             check_numbers = True
 
-    if check_upper_case == False and check_lower_case == False and check_alphanum == False and check_length >= 8 and check_spaces == False and check_numbers == True:
+    if check_upper_case == False and check_lower_case == False and check_alphanum == False and check_spaces == False and check_numbers == True:
         return True
         print("upper: ", check_upper_case, " lower: ", check_lower_case, " alnum: ", check_alphanum, " length: ", check_length, " spaces: ", check_spaces, " numbers: ", check_numbers )
     else:

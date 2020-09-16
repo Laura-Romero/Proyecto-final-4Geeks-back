@@ -3,14 +3,19 @@ import json
 import os
 import sqlite3
 import requests
-from flask import Flask, request, jsonify, url_for, redirect
+import jwt
+import bcrypt
+
+
+from flask import Flask, request, jsonify, url_for, redirect,  make_response
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
 from oauthlib.oauth2 import WebApplicationClient
 from utils import APIException, generate_sitemap, add_user_authentification
 from admin import setup_admin
-from models import db, User, UserOAuth
+from models import db, User
+from functools import wraps
 from flask_login import (
     LoginManager,
     current_user,
@@ -27,6 +32,7 @@ GOOGLE_DISCOVERY_URL = (
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEYS')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_CONNECTION_STRING')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
@@ -34,6 +40,7 @@ MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
 setup_admin(app)
+
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -46,7 +53,32 @@ def load_user(user_id):
 
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
+  
+def token_required(f):
+    #Este wraps debes importarlo
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        #el header tiene dentro un objeto, X-Access-Point es la key
+        if 'X-Access-Point' in request.headers:
+            token = request.headers['X-Access-Point']
+        
+        if not token:
+            return jsonify({'message': 'token missing'}, 401)
+        
+        try:
+         
+            data = jwt.decode(token, app.config['SECRET_KEY'])
+            current_user = User.get_user_by_username(data['username'])
+            
+        except:
+            return jsonify({'message': 'token is invalid'}), 401
 
+    
+        return f(current_user, *args, **kwargs)
+    
+    return decorated
+  
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
@@ -57,18 +89,40 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+@app.route('/login', methods=['POST'])
+def login():
+    
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+
+    if not username:
+        return 'Missing email', 400
+    if not password:
+        return 'Missing password', 400
+
+    user = User.query.filter_by(username=username).first()
+
+    if not user:
+        return 'User not found', 400
+
+    if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+        return f'Welcome back {username}'
+    else:
+        return 'Wrong password'
+      
 @app.route('/user', methods=['GET'])
-def handle_user():
-
-    print("You just got every single user")
-
+def get_every_user():
     return jsonify(User.getUsers()), 200
 
 @app.route('/user/<int:id>', methods=['GET'])
-def handle_user_by_id(id):
-    
-    print(f"You just got the user by id = {id}")
+@token_required
+def handle_user_by_id(current_user, id):
+
     status_user = User.get_user_by_id(id)
+    
+    if current_user['username'] != status_user['username']:
+        return jsonify({'message': 'cannot perfom function'})
+        
     if status_user == False:
         return "Not Found", 400
     else:
@@ -78,7 +132,14 @@ def handle_user_by_id(id):
 def create_user():
     new_user = User()
     user_data = request.get_json()
-    authentification = add_user_authentification(user_data)    
+    authentification = add_user_authentification(user_data)
+    check_new_username = request.json.get('username', None)
+    check_new_password = request.json.get('password', None)
+
+    if not check_new_username:
+        return 'Missing username', 400
+    if not check_new_password:
+        return 'Missing Password', 400    
 
     if authentification == True:
         new_user.add_user(user_data)
@@ -87,6 +148,7 @@ def create_user():
         return "Oops! Looks like something went wrong", 406
 
 @app.route('/user/<int:id>', methods=['PUT', 'PATCH'])
+@token_required
 def modify_user_info(id):
     data_to_modify = request.get_json()
     User.update_user_info(id, data_to_modify)
@@ -185,6 +247,24 @@ if __name__ == '__main__':
 
 
 
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    auth = request.authorization
+    if not auth or not auth.username or not auth.password:
+        return make_response('Could not verify', 401, {'WWW-Authenticate': 'Basic realm = "Login required!"'})
+
+    user = User.query.filter_by(username=auth.username).first()
+
+    if not user:
+        return jsonify({'message': 'no user found'})
+
+    if user.password == auth.password:
+        token = jwt.encode({'username': user.username}, app.config['SECRET_KEY'])
+        return jsonify({'token': token.decode('UTF-8')})
+
+    return make_response('Could not verify', 401, {'WWW-Authenticate': 'Basic realm = "Login required!"'})
 
 
 
