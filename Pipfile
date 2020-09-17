@@ -21,6 +21,10 @@ flask-admin = "*"
 flask-login = "*"
 requests-oauthlib = "*"
 oauthlib = "*"
+jwt = "*"
+bcrypt = "*"
+tweepy = "*"
+flask-jwt-extended = "*"
 
 [requires]
 python_version = "3.7"
