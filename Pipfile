@@ -25,6 +25,7 @@ jwt = "*"
 bcrypt = "*"
 tweepy = "*"
 flask-jwt-extended = "*"
+sqlalchemy-utils = "*"
 
 [requires]
 python_version = "3.7"
