@@ -56,7 +56,7 @@ client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return UserOAuth.get(user_id)
+    return User.get(user_id)
 
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
@@ -105,7 +105,8 @@ def Get_tweets():
     if __name__ == 'main':
         user = 'JuanGCardinale'
         tw_client = client
-        users_locs = [[tweet.user.screen_name, tweet.text] for tweet in tweepy.Cursor(client.home_timeline, screen_name=user).items(10)]
+        users_locs = [[tweet.user.screen_name, tweet.text] for tweet in tweepy.Cursor(client.home_timeline, screen_name=user).items(3)]
+
     return jsonify(users_locs)
     
 
@@ -168,7 +169,7 @@ def create_user():
         return "Oops! Looks like something went wrong", 406
 
 @app.route('/user/<int:id>', methods=['PUT', 'PATCH'])
-@token_required
+# @token_required
 def modify_user_info(id):
     data_to_modify = request.get_json()
     User.update_user_info(id, data_to_modify)
@@ -266,7 +267,6 @@ def callback():
     if userinfo_response.json().get("email_verified"):
         unique_id = userinfo_response.json()["sub"]
         users_email = userinfo_response.json()["email"]
-        picture = userinfo_response.json()["picture"]
         users_name = userinfo_response.json()["given_name"]
     else:
         return "User email not available or not verified by Google.", 400
@@ -298,22 +298,22 @@ if __name__ == '__main__':
 
 
 
-@app.route('/login', methods=['POST'])
-def login():
-    auth = request.authorization
-    if not auth or not auth.username or not auth.password:
-        return make_response('Could not verify', 401, {'WWW-Authenticate': 'Basic realm = "Login required!"'})
+# @app.route('/login', methods=['POST'])
+# def login():
+#     auth = request.authorization
+#     if not auth or not auth.username or not auth.password:
+#         return make_response('Could not verify', 401, {'WWW-Authenticate': 'Basic realm = "Login required!"'})
 
-    user = User.query.filter_by(username=auth.username).first()
+#     user = User.query.filter_by(username=auth.username).first()
 
-    if not user:
-        return jsonify({'message': 'no user found'})
+#     if not user:
+#         return jsonify({'message': 'no user found'})
 
-    if user.password == auth.password:
-        token = jwt.encode({'username': user.username}, app.config['SECRET_KEY'])
-        return jsonify({'token': token.decode('UTF-8')})
+#     if user.password == auth.password:
+#         token = jwt.encode({'username': user.username}, app.config['SECRET_KEY'])
+#         return jsonify({'token': token.decode('UTF-8')})
 
-    return make_response('Could not verify', 401, {'WWW-Authenticate': 'Basic realm = "Login required!"'})
+#     return make_response('Could not verify', 401, {'WWW-Authenticate': 'Basic realm = "Login required!"'})
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':

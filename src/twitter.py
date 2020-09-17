@@ -10,16 +10,16 @@ import tweepy
 
 def twitter_auth():
     try:
-        consumer_key = 'RpFMUcMoxysBdxEKposxkxisa'
-        consumer_secret = 'pFlnrS3MQ060s6SMkW4f7NZOqXhsT9ogXtbCYsYffcuCD7zo3G'
-        access_token = '157449530-g9V1HOm05CItASP58Ubjt5dJ5rkUQSvZZj6PFkvJ'
-        access_token_secret = 'jU19ySczJz6ywm0h5KkCiaNjUDuDDUtOMZhRhXUOuqJQJ'
+        consumer_key_tw = 'RpFMUcMoxysBdxEKposxkxisa'
+        consumer_secret_tw = 'pFlnrS3MQ060s6SMkW4f7NZOqXhsT9ogXtbCYsYffcuCD7zo3G'
+        access_token_tw = '157449530-g9V1HOm05CItASP58Ubjt5dJ5rkUQSvZZj6PFkvJ'
+        access_token_secret_tw = 'jU19ySczJz6ywm0h5KkCiaNjUDuDDUtOMZhRhXUOuqJQJ'
 
     except:
         return "missing keys"
 
-    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-    auth.set_access_token(access_token, access_token_secret)
+    auth = tweepy.OAuthHandler(consumer_key_tw, consumer_secret_tw)
+    auth.set_access_token(access_token_tw, access_token_secret)
     return auth
 
 def get_twitter_client(tw_auth):
@@ -27,8 +27,3 @@ def get_twitter_client(tw_auth):
     client = tweepy.API(auth, wait_on_rate_limit=True)
     return client
     
-    # if __name__ == '__main__':
-    #     user = 'JuanGcardinale'
-    #     client = get_twitter_client()
-    #     for tweet in tweepy.Cursor(client.home_timeline, screen_name=user).items(10):
-    #         print(tweet.text) 
