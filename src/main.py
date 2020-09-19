@@ -98,15 +98,16 @@ def sitemap():
 
 @app.route('/twitter')
 def Get_tweets():
+    print ("entro")
     auth = twitter.twitter_auth()
-    
+    print(auth, "autorizo")
     client = twitter.get_twitter_client(auth)
-
+    print(client, "recupero user")
     if __name__ == 'main':
         user = 'JuanGCardinale'
         tw_client = client
-        users_locs = [[tweet.user.screen_name, tweet.text] for tweet in tweepy.Cursor(client.home_timeline, screen_name=user).items(3)]
-
+        users_locs = [[tweet.user.screen_name, tweet.text] for tweet in tweepy.Cursor(client.home_timeline, screen_name=user).items(2)]
+    print(users_locs, "tweets")
     return jsonify(users_locs)
     
 

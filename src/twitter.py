@@ -10,16 +10,16 @@ import tweepy
 
 def twitter_auth():
     try:
-        consumer_key_tw = 'RpFMUcMoxysBdxEKposxkxisa'
-        consumer_secret_tw = 'pFlnrS3MQ060s6SMkW4f7NZOqXhsT9ogXtbCYsYffcuCD7zo3G'
-        access_token_tw = '157449530-g9V1HOm05CItASP58Ubjt5dJ5rkUQSvZZj6PFkvJ'
-        access_token_secret_tw = 'jU19ySczJz6ywm0h5KkCiaNjUDuDDUtOMZhRhXUOuqJQJ'
+        consumer_key = '5gkw8QMwVpUL6hhKAFNSmCJir'
+        consumer_secret = '9f0zGW1pebrmAXyMeTroK8W7z0rxlQz41ADanVx1rxFdYk7Qr3'
+        access_token = '157449530-vBGOFXkgPrbN1qBwIO1MVotnrjS6daSrQpljePSw'
+        access_token_secret = 'g1Kk90vFyktBPAwqE9EIwjLhIFOEnOGQPjDfWi4AKxsaU'
 
     except:
         return "missing keys"
 
-    auth = tweepy.OAuthHandler(consumer_key_tw, consumer_secret_tw)
-    auth.set_access_token(access_token_tw, access_token_secret)
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_token_secret)
     return auth
 
 def get_twitter_client(tw_auth):
