@@ -98,16 +98,12 @@ def sitemap():
 
 @app.route('/twitter')
 def Get_tweets():
-    print ("entro")
     auth = twitter.twitter_auth()
-    print(auth, "autorizo")
     client = twitter.get_twitter_client(auth)
-    print(client, "recupero user")
     if __name__ == 'main':
         user = 'JuanGCardinale'
         tw_client = client
         users_locs = [[tweet.user.screen_name, tweet.text] for tweet in tweepy.Cursor(client.home_timeline, screen_name=user).items(2)]
-    print(users_locs, "tweets")
     return jsonify(users_locs)
     
 
@@ -232,6 +228,7 @@ def loginOAuth():
 def callback():
     # Get authorization code Google sent back to you
     code = request.args.get("code")
+    print('code')
 
     # Find out what URL to hit to get tokens that allow you to ask for
     # things on behalf of a user
