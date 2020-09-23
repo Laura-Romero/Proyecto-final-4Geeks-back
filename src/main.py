@@ -30,8 +30,8 @@ from flask_login import (
     logout_user,
 )
 
-GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
-GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", None)
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "130980975494-b5rfm4afsnvjr3jeqm4vn3i9l37vn0a5.apps.googleusercontent.com")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "L8AbO4iGJCMWvsLcSGqPHi4q")
 GOOGLE_DISCOVERY_URL = (
     "https://accounts.google.com/.well-known/openid-configuration"
 )
@@ -113,10 +113,8 @@ def Get_tweets():
 
 @app.route('/login', methods=['POST'])
 def login():
-    
     username = request.json.get('username', None)
     password = request.json.get('password', None)
-
 
     if not username:
         return 'Missing email', 400
@@ -129,13 +127,17 @@ def login():
         return 'User not found', 400
 
     if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-        return f'Welcome back {username}'
+        token = jwt.encode({'username': user.username}, app.config['SECRET_KEY'])
+        return jsonify({'token': token.decode('UTF-8')})
+        # return f'Welcome back {username}'
     else:
         return 'Wrong password'
       
 @app.route('/user', methods=['GET'])
-def get_every_user():
-    return jsonify(User.getUsers()), 200
+@token_required
+def get_every_user(current_user):
+    print(current_user)
+    return jsonify(current_user), 200
 
 @app.route('/user/<int:id>', methods=['GET'])
 @token_required
@@ -158,14 +160,15 @@ def create_user():
     authentification = add_user_authentification(user_data)
     check_new_username = request.json.get('username', None)
     check_new_password = request.json.get('password', None)
-
+    
     if not check_new_username:
         return 'Missing username', 400
     if not check_new_password:
         return 'Missing Password', 400    
     if authentification == True:
-        new_user.add_user(user_data)
-        return "New user created", 200
+        user = new_user.add_user(user_data)
+        print(user)
+        return jsonify(user.serialize()), 200
     else:
         return "Oops! Looks like something went wrong", 406
 
@@ -211,7 +214,7 @@ def delete_widget_props(id):
 
     return "props deleted", 200
 
-@app.route("/login")
+@app.route("/login", methods=["GET"])
 def loginOAuth():
     #return request.base_url, 200
     # Find out what URL to hit for Google login

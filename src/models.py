@@ -61,6 +61,7 @@ class User(db.Model,  UserMixin):
 
         db.session.add(new_user)
         db.session.commit()
+        return new_user
     
     def getUsers():
         all_users = User.query.filter_by(is_active = True)
@@ -114,7 +115,7 @@ class User(db.Model,  UserMixin):
     def serialize(self):
         return {
             "id": self.id,
-            "name": self.name,
+            "username": self.username,
             "email": self.email,
         }
 
