@@ -17,7 +17,6 @@ association_table = db.Table('association', db.Model.metadata,
 class User(db.Model,  UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(25), unique=True, nullable=False)
-    password = db.Column(db.String(80), unique=False, nullable=True)
     password = db.Column(db.String(250), unique=False, nullable=True)
     fullname = db.Column(db.String(50), unique=False, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -61,6 +60,7 @@ class User(db.Model,  UserMixin):
 
         db.session.add(new_user)
         db.session.commit()
+        return new_user
     
     def getUsers():
         all_users = User.query.filter_by(is_active = True)
@@ -114,7 +114,7 @@ class User(db.Model,  UserMixin):
     def serialize(self):
         return {
             "id": self.id,
-            "name": self.name,
+            "username": self.username,
             "email": self.email,
         }
 
